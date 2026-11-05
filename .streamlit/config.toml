@@ -1,0 +1,17 @@
+# Pins the app to a light Emirates-inspired palette.
+#
+# Without this, Streamlit follows the viewer's OS dark-mode preference and
+# renders button text in a light-on-light or dark-on-dark combination that the
+# custom CSS then has to fight. Setting the base theme here fixes the contrast
+# at the source.
+
+[theme]
+base = "light"
+primaryColor = "#D71921"
+backgroundColor = "#FAF8F5"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#2C2C2C"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
