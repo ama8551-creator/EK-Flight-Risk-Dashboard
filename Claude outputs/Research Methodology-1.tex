@@ -1,0 +1,216 @@
+\chapter{Research Methodology}
+\label{ch:methodology}
+
+\section{Introduction to Methodology}
+
+This chapter will explain the research methodology adopted in order to answer the research questions stated in Chapter 1. It is important to note that this project is not an empirical research that requires collecting any information directly from respondents. This project involves creating a synthetic dataset that reflects realistic airline booking processes, constructing a priority risk scoring model for risky flights, and building a dashboard interface for the priority scoring system. The chapter is organised into four main sections; the first section would introduce the overall methodology of this project including tools and technology utilized, while the second section would introduce the sources of the data used for building a data set and preparing it.
+
+\section{Research Design and Approach}
+
+This study adopts a quantitative, design-and-build research approach. Unlike empirical research that collects primary data through interviews, surveys, or field observation, this thesis develops a working prototype that demonstrates how data analytics can be applied to support inventory analysts in prioritizing high-risk flights within airline revenue management operations. This approach is consistent with prior applied research in aviation operational analytics, where the design and evaluation of decision support tools has been used to demonstrate the practical value of analytical models \citep{RakshitKrishnamurthyYu1996, Salleh2023, WatsonWixomHoffer2006}.
+
+This thesis adopts a design and build research methodology approach: rather than conducting empirical research based on primary data collected via interviews or surveys, a tool is designed that demonstrates how data analytic methods can support inventory analysts in prioritising high-risk flights in airline revenue management. It is important to know that this is not out of context from other aviation operational analytics studies conducted before. For example, \citet{RakshitKrishnamurthyYu1996}, \citet{Salleh2023}, and \citet{WatsonWixomHoffer2006} have used similar design evaluation methods to prove the practicality of analytical models.
+
+There are three key elements to the methodology approach: first element includes generating a synthetic dataset of flights operated over 2 years on four different multicity, multiclass routes; second element involves creating a composite risk-scoring model to generate prioritization scores from flight operational variables; and third element requires designing an interactive visualization dashboard using the Streamlit package in Python. The last step requires analysts to play back simulated bookings at accelerated speed to visualize prioritized flights in the dashboard. It is worth mentioning that all three steps are replicable.
+
+\section{Data Source and Preparation}
+
+A central challenge in airline revenue management research is obtaining sufficient data for cabin-level passenger prioritisation. Data on the booking process, load factors per cabin category, cancellations, and no-shows is not readily accessible, as it is treated as confidential by airlines. The aviation datasets provided by government agencies or freely available are limited to traffic-related information such as scheduling, delays, and prices, and do not contain the data required for this analysis.
+
+Therefore, to address this problem, a fully synthetic dataset was created, generated according to certain parameters, distributions, and operational pattern structure mentioned by \citet{Belobaba1987, Belobaba1989}, \citet{LeeHersh1993}, and \citet{PakPiersma2002}. This data includes seasonality of bookings, directional demands, weekday differences, and the booking process in general. Such data generation techniques have been used in prior studies in this research area.
+
+\subsection{Dataset Scope}
+
+The flights that have been used in the study include DXB-BEY, DXB-AMM, DXB-JED, and DXB-RUH in both directions (DXB-BEY, BEY-DXB), (DXB-AMM, AMM-DXB), (DXB-JED, JED-DXB), and (DXB-RUH, RUH-DXB). which creates eight unique directional city pairs included in the data set. BEY and AMM routes have two scheduled flights per day per direction, while there is another extra flight for high season periods. JED and RUH routes have three scheduled flights per day per direction because of the higher base frequency on those routes. The choice of the routes has been made taking into consideration the four demand patterns observed within the region. These patterns are the diaspora driven leisure pattern (BEY), the leisure/school break pattern (AMM), the religious tourism/Hajj and Umrah demand pattern (JED), and finally, the corporate/business travel pattern (RUH). The dashboard itself is designed to be route-agnostic, so adding further routes requires no code changes, only new rows in the input dataset.
+
+The dataset covers the period from January 2024 to March 2027, structured as a snapshot taken as of December 1, 2026. Flights with departure dates before this date are represented in their final flown state (labeled FLN), while flights with departure dates after this date are represented as open flights currently accepting bookings, with multiple snapshots capturing how bookings have built up over the booking window.
+
+\subsection{Variables}
+
+The data table includes 36 columns representing each variable in order to capture the contextual data about flights, status, forecasted outcome, comparison against historical flights, and market mix according to the ranking algorithm and dashboard analytics system. The main categories are listed below:
+
+Flight identifiers: flight number, route, origin, destination, departure date, and departure time.
+
+Time context: flight, route, departure airport, arrival airport, departure date, and departure time. Contextual data about time: year, season, period which defines if it's a peak or off-peak time, and day of week (DOW, encoded with 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday, 7 = Sunday).
+
+Capacity and bookings: first class, business class, economy class capacities (F Cap, J Cap, Y Cap), current bookings for those classes (F Bkg, J Bkg, Y Bkg), and the overall bookings (Total Bkg).
+
+Booked seat factor (BSF): current BSFs for each cabin class (F BSF, J BSF, Y BSF) and overall BSF of flight (Total BSF), which represents how full is the aircraft as percentage of overall capacity. Mathematically speaking the Booked Seat Factor BSFc(i) for flight i is defined by Bookingsc(i)/Capacityc(i) where cabins c belong to set \{F, J, Y\}. Overall book seat factor is computed by $\sum_{c} \text{Bookings}_c(i) / \sum_{c} \text{Capacity}_c(i)$. If BSF is greater than 1.0 then the flight is overbooked.
+
+Time to departure: days between the snapshot and the scheduled departure.
+
+Forecast BSF: forecasted book seat factor values for each cabin at departure time (F Fcst BSF, J Fcst BSF, Y Fcst BSF).
+
+BSF vLY: difference between either current/forecasted total BSF minus same flight last year.
+
+Status: whether the flight is flown (FLN) or open for booking.
+
+Point of Sale (POS): the geographic distribution of bookings by country of sale, captured per flight using ISO 3166-1 alpha-2 country codes. The dashboard is designed to accommodate bookings from any country; the specific set of countries displayed at any time is derived dynamically from the loaded dataset. In the synthetic dataset generated for this thesis, bookings are distributed across a representative set of countries typically observed on routes departing from or arriving in the United Arab Emirates, including the United Arab Emirates (AE), Saudi Arabia (SA), Lebanon (LB), Jordan (JO), Australia (AU), Canada (CA), the United States (US), the United Kingdom (GB), Germany (DE), and France (FR). The sum of POS values for a row equals the total bookings for that flight, and the United Arab Emirates is the dominant market across all modeled routes, reflecting the strong UAE-based diaspora and resident demand for travel to the Middle East and beyond.
+
+\subsection{Booking Curve and Peak Logic}
+
+Constructing the database involved multiple layers of operational reality to make it representative. First, an S-shaped booking curve was implemented, meaning that bookings increase gradually at the start of the booking period then accelerate as the departure date approaches, peaking just before departure. The database contains snapshots which are taken at eleven days prior to departure date including (120, 90, 75, 60, 45, 30, 21, 14, 7, 3, and 1 days). It is really important because the dashboard will be able to reconstruct booking build up for these particular days.
+
+Secondly, a peak calendar was designed in order to model different seasons and holidays' peaks depending on each individual route characteristics, making the analysis more precise and relevant. In case of BEY route, peaks were considered to include Christmas outbound and return, extended summer return season, new year return. For the AMM route, additional peaks were included related to the school break return period and UAE National Day return peak, apart from the already mentioned peaks related to the BEY route. In terms of JED route, most of the peaks relate to religion tourism which includes hajj outbound and return peaks which occur every year according to actual dates of the holy trip, umrah return which occurs every day in Ramadan period, weekend umrah return from Friday to Sunday due to UAE national day and school break period and Eid al Fitr return traffic. Lastly, RUH route includes corporate peaks which are related to weekday flights (Sunday to Thursday being working days in Saudi Arabia) as well as weekends which include Friday and Saturday.
+
+Thirdly, a logic of weekday travel was included. It means that all leisure-related peaks were allocated certain weekdays, where outbound traffic peaks occurred from Thursday to Saturday while return traffic peaks occurred from Saturday to Monday. Direction specific peaks related to religious tourism and corporate traffic followed the same rule depending on each route.
+
+Finally, booking patterns reflecting actual operational practice were incorporated to make the dataset closer to reality. Therefore, for example for AMM route economy seats were sold out during summers return, new year return and Eid returns, UAE National day return peaks, while for JED route economy class was oversold during hajj period, Ramadan umrah, weekend umrah and Eid Al Fitr Return. Business class was oversold on RUH flights from Sunday to Thursday (weekdays) in little bit bigger proportion compared to weekends which represent Friday and Saturday flights.
+
+\subsection{Grounding Parameters in Real Operational Characteristics}
+\label{sec:ch3:grounding}
+
+Although the dataset is wholly synthetic, the values used for the parameters related to booking curves, cabin load factors, rates of cancellations, no-shows, overbooking, and point of sale mix were chosen in accordance with industry benchmarks and not made up.
+
+Specifically, the following calibrations were applied:
+
+Average load factors (peak period) were chosen from the corresponding published IATA ranges for Middle East narrow and wide-body short-haul carriers in Economy (75--90\%), Business (55--75\%) and First Class (40--65\%). No-show rates were chosen as 3--8\% per class, which corresponds to published no-show percentages of Middle East airlines. For the Economy cabin, an overbooking rate was calibrated to the industry range of 5--15\% over booked capacity on peak-dated flights.
+
+The booking curve type (S-shape curve) and booking pickup pace during the last 21 days prior to departure date was chosen based on patterns described in airline revenue management literature \citep{Belobaba1987, Belobaba1989, LeeHersh1993, PakPiersma2002}.
+
+Point of sale distributions corresponded to typical distribution for Middle East airlines with a major home market share (85--90\% UAE for the DXB outbound), ethnic diaspora markets (AU, CA, UK) and European markets in smaller amounts.
+
+For the JED route, peak calendar was formed according to the operationally important peak dates such as Hajj and Umrah dates (actual each year). On other routes, there were peaks due to corporate traffic (RUH route with Sunday--Thursday week of Saudi Arabia) and leisure dates of Christmas and New Year holidays for leisure routes (BEY and AMM).
+
+Therefore, since the dataset is calibrated against the typical industrial benchmark ranges, it can be stated that despite the synthetic and reproducible (from the known seed) nature of the generated flights data, its aggregate properties correspond to the actual properties of similar real data.
+
+\subsection{Data Generation and Validation}
+
+Creating the dataset required Python language, more specifically pandas, NumPy, and openpyxl libraries. For reproducibility purposes, the value of the random seed was fixed, meaning that anyone who runs the program will get the same set of data. POS values have been generated deterministically via a hashing of both flight number and departure date; therefore, guaranteeing that the POS values are reproducible by flight. Validation of realistic behaviour for the generated dataset included visual checking of the BSF distribution depending on seasons, cabins, and routes, making sure that the bookings follow the capacities and BSF values, booking curves behave themselves on the snapshot days, peak periods generate appropriate booking curves depending on the directions of flights and finally ensuring that POS values sum up to booking numbers. Validation of the overbooking cases has been done through verification of booking numbers of the Economy and Business cabins after overbooking scenarios.
+
+\section{Development Approach}
+
+There are five interconnected elements to the strategy: a composite prioritization algorithm that turns the factors into a numeric risk ranking for each flight individually, a classification process which classifies each flight according to how important they are, an interactive visualization tool that prioritizes flights according to the risk algorithm results, an automated peak detection system which predicts high-demand periods using machine learning and past history, and a sales point analysis view which looks at the geographical pattern of reservations. This combination of tools creates a full decision support environment.
+
+\subsection{Composite Prioritization Model}
+\label{subsec:composite}
+
+The prioritization model is designed as a composite risk-scoring approach that combines the operational and booking-related variables described in Section 3.3 into a single score for each flight. The score reflects the urgency with which an inventory analyst should review the flight before departure.
+
+The variables used to create the model are directly influenced from the airline revenue management literature, specifically studies by \citet{Belobaba1987, Belobaba1989} and \citet{LeeHersh1993}. The selected variables include time to departure, cabin level BSF, total BSF, forecast BSF, and BSF vLY. Time to departure indicates how many days before departure the flight status was checked to create the score, which means that there would be little time left for corrections if there were any issues found in the booking status. Cabin Level BSF indicates those flights where economy class is above capacity, indicating the possibility of denial boarding, while the flights that are almost reaching their maximum capacity need extra attention. Total BSF is the most important variable because when calculating this variable, it goes beyond capacity. Forecast BSF is the estimation of the final BSF of flights at departure that indicate the likelihood of reaching maximum capacity despite current bookings not exceeding the limit yet. Finally, the significant variation in the booking status from the equivalent flight last year indicates unusual demand behavior worth analyzing further.
+
+The calculation of the composite risk score involves three components added together up to the maximum of 100 points: base risk score according to categories defined in Section 3.4.2 of this study, urgency bonus according to number of days until departure, and severity bonus according to percentage over full capacity of the total BSF. These three components allow an analysis of why certain flights receive higher composite risk scores than others. It is necessary to mention that urgency bonus bands do not align perfectly with snapshots in the data set. For instance, snapshots are divided into intervals from 0 to 5 days, from 6 to 10 days, from 11 to 20 days, from 21 to 35 days, from 36 to 60 days, and flights with more than 60 days. On the other hand, the urgency bonus decreases progressively, starting with 25 points when less than 5 days remain until departure and reaching zero after 60 days before departure. Severity bonuses depend on how many flights exceed the total BSF capacity. In particular, this variable ranges from 5 to 15 additional points. The additive nature of the model ensures interpretability of scores for future analyses.
+
+Formally, composite risk score for each open flight i may be calculated as follows:
+
+\[ \mathrm{Score}(i) = B(c_i) + U(d_i) + S(e_i), \quad \text{capped at } 100 \]
+
+where:
+
+$c_i \in \{\text{RED}, \text{ORANGE}, \text{YELLOW}, \text{GREEN}\}$ is the primary risk category assigned by the rules in Section 3.4.2, with base scores $B(\text{RED}) = 75$, $B(\text{ORANGE}) = 50$, $B(\text{YELLOW}) = 30$, and $B(\text{GREEN}) = 0$;
+
+$d_i$ is the actual days to departure, and $U(d_i)$ is a piecewise urgency bonus: $U = 25$ for $d \leq 5$, $U = 20$ for $6 \leq d \leq 10$, $U = 15$ for $11 \leq d \leq 20$, $U = 10$ for $21 \leq d \leq 35$, $U = 5$ for $36 \leq d \leq 60$, and $U = 0$ for $d > 60$;
+
+$e_i = \max(0, \mathrm{Total\ BSF}_i - 1.0)$ represents the excess of total bookings above full capacity, and $S(e_i)$ is a severity bonus proportional to $e_i$. The 100-point cap ensures that the composite score remains interpretable on a fixed scale.
+
+\subsection{Risk Categorization}
+
+Assigning every open flight into any of the four main categories according to predetermined criteria becomes essential in order to facilitate the efficient analysis and decision-making process. The following describes how every single open flight is categorized.
+
+RED (immediate action): this is a critical condition when total BSF goes over 100 percent; it means that bookings have exceeded aircraft capacity and there is a possibility of denied boarding.
+
+ORANGE (monitor closely): flights where Economy BSF exceeds 100 percent but total BSF remains at or below 100 percent, and the flight departs within 45 days. These flights have Economy overbooking that could tip the total over if premium cabins fill further.
+
+YELLOW (early warning): flights where the forecast total BSF exceeds 100 percent, but the flight is not already RED or ORANGE. These are flights projected to exceed capacity by departure.
+
+GREEN (normal): all remaining flights, operating within expected parameters and not requiring any adjustments.
+
+In addition to the primary category, a secondary underperforming vs LY (black) flag is applied to any flight whose BSF vLY is at least ten percentage points below the equivalent flight in the previous year.
+
+This secondary flag provides an additional dimension for identifying problems faced by flights. This includes low demand problems, pricing problems, competitiveness problems, and operations disruption problems. This is regardless of whether or not the problem falls under any overbooking categories. Flights with black flags are flights that can be green; that means flights operating under the capacity limit yet lower than last year's. And they could also be red flights; that means overbooked and lower than last year's peaks. The way they have been categorized relates to visualizations mentioned by \citet{YigitbasiogluVelcu2012}.
+
+\subsection{Dashboard Implementation}
+
+The dashboard is implemented in Python using the Streamlit framework. Streamlit allows building up a highly responsive, interactive web application, where both the prioritization algorithm itself along with the UI are coded in Python. There were no requirements stated in terms of programming language choice; Python was selected in order to use all the advantages that came from developing the model itself in Python.
+
+There are five tabs inside the dashboard:
+
+Overview: the main starting tab, showing summary KPIs in card format, dynamic ``today's priorities'' widget indicating the highest prior actions, red alert banner that alerts the analyst in case of at least one flight with a RED status, and ranked table for showing details on all current open flights according to the composite score value. Clicking on any row would bring additional information in form of a breakdown on the cabin level, and a recommended action for each of these flights.
+
+Flight Analysis: dedicated analysis on specific flights / subsets, including a Booking Curve sub-tab that compares the current year vs the previous one, and a Point of Sale visualization indicating the geographical locations where sales took place. The tab is flexible and allows filtering flights according to various criteria including flight number/date range/direction/route. Analysts could run the analysis on specific single flight, as well as do the aggregation for all flights per selected time span
+
+Peak detection: AI-powered feature providing the functionality presented in the AI-Powered Peak Detection section below.
+
+Replay: Real-Time Simulation feature discussed in the Real-Time Simulation section below.
+
+Help and Guide: self-sufficient help tab containing comprehensive user guide as PDF file including explanation of the Risk Categories, Column Definitions, Filters Explanation, Calculation Formula of Composite Score, Detailed Description for each Dashboard Tab, recommended workflow of analysis for Analysts, Methodology Notes, FAQ section.
+
+A sidebar containing nine filters applies across all tabs: route (city-level), direction, date range, risk category, cabin class, days to departure, day of week, period, and flight number. All filters default to showing all flights, allowing analysts to progressively narrow their view.
+
+\subsection{Real-Time Simulation}
+
+To demonstrate the prioritization logic under dynamically changing conditions, the dashboard includes a real-time simulation feature in the Replay tab that reproduces how booking activity would evolve over time. Rather than connecting to a live booking system, the simulation uses the multiple snapshots available for open flights in the synthetic dataset to replay how bookings built up over the booking window. The Analyst has the ability to slide the "as of" date slider, which ranges from 60 days before the snapshot date until the actual snapshot date, and then monitor how the whole Dashboard rearranges as flights move from one risk category to another. Playback controls allow the slider to advance automatically at 1x, 2x, or 5x speeds. This simulation-based approach to demonstrating real-time decision support is consistent with prior work in airline operational analytics \citep{RakshitKrishnamurthyYu1996, WatsonWixomHoffer2006}.
+
+\subsection{AI-Powered Peak Detection}
+
+The algorithm works by filtering the historical dataset according to the chosen route and period, separates the flights into directions, and goes through every week during the year, calculating how many BSFs were in total, and dividing by the number of departure flights during this week, marking the week as a potential peak if the result exceeds a particular number, currently set at 85 percent, then the secondary test happens where the system tries to figure out whether the demand was uniform throughout the entire week or focused on certain days. If the second case occurs, then the system classifies it as a weekday anchored peak.
+
+After that process, any adjacent weeks that pass all tests will become continuous periods, and every single peak receives a title, degree of reliability mark, and classification type. At the moment, the process takes place automatically without requiring intervention from the researcher. The analyst receives recommendation cards with a brief overview of what the system has detected and checks whether the recommendations are accurate. A verification panel button provides detailed information about the peak for the prior year on a day-by-day basis.
+
+In addition, peaks can be entered manually when operational knowledge beyond historical patterns is relevant. Several factors should be considered when making such predictions apart from historical datasets.
+
+All approved peaks, both manually added and recognized automatically by AI, are exported into an external json file titled as approved peaks, this file will be used in every other dashboard component later. In addition, the period cell for any flight route-direction pair is only populated once the pair matches an approved peak, making the peak calendar fully curator-driven.
+
+\subsection{Point of Sale Analysis}
+
+The point of sale (POS) analysis capability enables analysts to examine the geographic distribution of bookings per flight or across a filtered subset of flights. The analysis uses the POS country columns in the dataset, which capture the number of bookings originating from each country of sale (described in Section 3.3.2).
+
+Within the Flight Analysis tab, the POS sub-tab presents a donut chart of the booking distribution across countries, a summary of the top markets, and a tabular breakdown of bookings per country. If no specific flight is chosen, the sub-tab aggregates information related to all flights within the selected filter scope. This allows the analysis of market performance for certain routes, dates, or holidays.
+
+The POS view is designed to support analyst decisions related to pricing, overbooking, and market strategy. For example, whenever there is a change in the POS mix on a particular route, the analyst needs to consider it, because it may indicate a change in demand structure that could affect the no-show rate or passengers' ability to pay.
+
+\subsection{Machine Learning Techniques Used}
+
+Besides the composite score-based risk categorization rule in Section 3.4.1, there are other three ML techniques used in this project which consist of automation in detection patterns and making forecasts. All the three techniques are developed in scikit-learn of Python programming language on the history flown flights dataset.
+
+Unsupervised Learning Technique - K-means Clustering: Peak Detector. In Section 3.4.5 a Peak detector has been explained, which uses the K-means clustering algorithm as its foundation. The flights data of history is aggregated at the level of week-direction and each week is represented with a vector containing five features, which consists of average total booked seat factor, standard deviation of total booked seat factor, maximum total BSF, average economy BSF, and average business BSF. All the five features were normalized using z-score method. The K-means clustering algorithm with three clusters has been performed and the output clusters represent peaks, shoulder and off-peaks categories respectively. The analyst manually validates the detected peaks generated from the peaks clusters and approves those peaks according to the human-in-the-loop process of Section 3.4.5. K-means clustering algorithm was selected since it is easy to interpret, computationally inexpensive and suitable for data where the separation boundaries exist clearly, as is the case in historical air travel demands datasets.
+
+The objective function of the K-means clustering algorithm partitions $n$ observations into $k$ clusters and is defined as:
+\[ J = \sum_{k=1}^{K} \sum_{x \in C_k} \| x - \mu_k \|^2, \]
+where $C_k$ refers to the $k$-th cluster while $\mu_k$ denotes its centroid.
+
+Supervised Learning - Random Forest Regression: Forecast BSF. The random forest regression algorithm is used for forecasting total BSF of the flights that falls into YELLOW risk category rule, which has been discussed in Section 3.4.1. The independent variables in the random forest regression model include the current booking status of F class, J class and Y class of the flights, total booked seat factors, number of days remaining until departure date and the day of week. The flight snapshot is considered valid only when the number of days remaining until departure date is greater than 14. The random forest regression algorithm has been used since it can handle complex relationships between variables efficiently, and does not require explicit interaction between features, and also provides interpretable feature importance values.
+
+Supervised Learning Technique - Decision Tree Classifier: Risk Category Validation. The decision tree classification technique is used here to predict the rule-based risk category (RED, ORANGE, YELLOW, GREEN) for each flight, using the features of each flight such as total BSF, cabin BSFs, forecast BSF, and actual days left to departure. Two purposes are served by the decision tree model. Firstly, the predicted categorization can be compared with the rule-based categorization and those discrepancies highlighted, and secondly, the output probability values from this classification problem provide an estimation of the confidence in categorizing a particular flight. Decision tree classifier is used due to its advantage of providing easily interpretable decisions which match with human-defined categorizations.
+
+\section{Tools and Technologies}
+
+The usage of the synthetic data creation process, priority model construction, and the visualization process through dashboards used a mixture of open-source libraries written using the Python language. These tools were selected due to the fact that they have been broadly used and are well documented, allowing anyone else to reproduce the process or improve upon the work.
+
+\subsection{Programming Language and Core Libraries}
+
+Python 3 was selected as the primary programming language for both data generation and dashboard implementation. Python's extensive data analytics ecosystem, large community, and clear syntax make it the de facto standard for applied data analytics work.
+
+There were three basic libraries used during this project. Pandas library has been used to provide table-based data structures known as DataFrames, which have been used for the manipulation of the flights data set through filtering, grouping, sorting, and aggregations. Numpy library has been used for performing numerical calculations along with generating random numbers using a seed for reproduction purposes and statistics for booking curve and overbooking. Openpyxl library is used to read/write microsoft excel files to generate an output data set.
+
+The scikit-learn library \citep{Pedregosa2011} provided implementations of the K-Means clustering, Random Forest regression, and Decision Tree classification algorithms used in the pipeline components described in Section 3.4.7.
+
+\subsection{Dashboard Framework}
+
+The dashboard was built using Streamlit, an open-source Python framework for building interactive web applications directly from Python code. Streamlit was selected over other options for several reasons: it integrates well with Pandas and NumPy, keeping the prioritisation logic and the UI in a single codebase; it supports fast iteration through hot-reload features; and it allows a web app to run inside local browsers without a separate deployment process. Streamlit's component model allowed the dashboard to be organized into tabs, sidebar filters, KPI cards, and expandable detail panels without requiring separate front-end development.
+
+\subsection{Interactive Visualizations}
+
+Interactive charts within the dashboard were implemented using Plotly, a Python graphing library that produces browser-renderable charts with built-in support for tooltips, zoom, legend interaction, and image export. That is why Plotly was selected rather than other visualization packages because it provides high-quality graphs without many settings. Moreover, Plotly works perfectly well with Streamlit.
+
+\subsection{Data Persistence}
+
+After analyzing the peaks, they have been recorded using a peak calendar in order to keep track of all the data collected, and this calendar has been saved in a json format named approved\_peaks.json in the project data folder. JSON was chosen because it is easily readable and editable by humans.
+
+\subsection{Development Environment}
+
+The dashboard was developed in the Cursor integrated development environment, which combines a standard code editor with AI-assisted development capabilities. The AI assistance was used to accelerate the iterative implementation of the dashboard features based on the specifications developed during the thesis work, with every change inspected and tested by the researcher. The use of AI-assisted development reflects the current state of practice in applied data analytics work and did not affect the design or methodology of the dashboard, which were defined by the researcher.
+
+\subsection{Supporting Tools}
+
+Microsoft Excel was used throughout the project for inspection and validation of the generated dataset. Microsoft Word was used to draft the thesis content, and Overleaf, an online LaTeX editor, was used to produce the final typeset thesis document following the Rochester Institute of Technology thesis template.
+
+\section{Chapter Summary}
+
+The research methodology of this thesis has been discussed in Chapter 3, which describes the approach adopted. The research method is synthetic: a synthetic dataset was generated, a prioritisation model developed, an interactive dashboard built, and the behaviour of the resulting system analysed through functional demonstration.
+
+Section 3.2 provides the overall description of the research design adopted, and discussed why this particular methodology is used based on the literature on airline revenue management, dashboards, and operations analytics. Section 3.3 describes the details of the synthetic data set, covering four routes and eight directions, along with thirty-six variables included in it and its booking curve and peak calendar per route.
+
+Furthermore, the steps taken to achieve reproducibility and realism were explained. Section 3.4 explains the five components of the dashboard: composite prioritization score, which synthesizes the operational variables into a single value that can be interpreted, categorization scheme which classifies flights into risk categories while adding another category that shows whether the flight is underperforming compared to last year.
+
+An interactive dashboard developed using Streamlit containing five different tabs displaying the flights prioritized, a real-time simulation feature displaying the booking process over time, an AI-powered peak detection system recommending recurring periods of demand using the past booking trends leaving the final call to the analyst, and point of sale analysis allowing analysis of booking patterns in the market level.

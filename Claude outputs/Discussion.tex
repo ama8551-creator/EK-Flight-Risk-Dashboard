@@ -1,0 +1,64 @@
+\chapter{Discussion}
+\label{ch:discussion}
+
+\section{Introduction}
+
+Chapter 5 provides an interpretation of the results obtained in Chapter 4 and evaluates them taking into account the previous literature review carried out in Chapter 2. In particular, this chapter provides the restatement of the research aim and the research questions, analysis of results, their contribution to the field of study in the framework of the existing literature on the topic, their implications for practices in the field, as well as the limitations of the present study.
+
+The research aim is developing a real-time decision support dashboard that will help the inventory analysts prioritize the high-risk flights in airline revenue management. To achieve this goal, three research questions have been considered throughout the research process. They include: (1) What operational and booking-related variables may be used in order to identify the risk level of a flight before its departure? (2) What kind of method may be developed to combine these variables into a priority index which will reflect the urgency of attention from the side of inventory analyst regarding a particular flight? (3) How the developed model may be realized in terms of a dashboard?
+
+\section{Discussion of Findings}
+
+
+
+\subsection{Variables that Indicate Flight Risk}
+
+Regarding the variables useful for identifying the risks, Chapter 3 provides a number of operational and booking variables based on the literature of revenue management of airlines \citep{Belobaba1987, Belobaba1989, LeeHersh1993, PakPiersma2002}. Among those, there are time to departure, cabin level booked seat factor, total booked seat factor, forecasted booked seat factor, booked seat factor relative to last year, and risk category.
+
+The second research question has been addressed in Chapter 4 where it has been shown that these variables, in combination, are a valid tool to identify risky flights, those with upcoming capacity issues and those without. The distribution of risk categories in the dataset included eleven flights on the top of the ordered list right after KPI cards, representing clear operational scenario known well for any experienced analyst: late holiday returns with filling of the premium cabins following the Economy overbooking parameter has been reached, as well as weekend returns with religious-tourism with high demand resulting in similar capacity problem. The used variables in this case are not only theoretically sound, but also effective as far as the cases of interest go.
+
+Introducing an under-performing relative to last year flag increases the scope of the model as compared to typical models in revenue management of airlines which consider mainly the overbooking dimension \citep{Belobaba1987, Belobaba1989}. Indeed, this flag highlights those cases which have worse performance relative to the comparable in historical terms case but still do not represent capacity overuse case. Dual-dimension approach of risk definition considers risks in its two aspects, upside and downside ones, being consistent with the approach to revenue management where both over- and undercapacity are viewed as costs \citep{BodilyWeatherford1995}.
+
+\subsection{Combining Variables into a Prioritization Score}
+
+Another element of the second research question involved the creation of a method for combining all identified variables into a composite score. The additive structure created in Chapter 3 and demonstrated in Chapter 4 is based on three simple components: a base score based on the risk category, a bonus for urgency based on actual days left to departure and a bonus for severity based on the distance of the sum of BSFs from the threshold.
+
+This decision was inspired by the design guidelines established by \citet{YigitbasiogluVelcu2012}. Their research suggests that one of the main functions of a well-designed dashboard is the reduction of the user's cognitive load through interpretability. With an additive composite score, the reasons for any score become clear for an analyst and allow for more trust in the model and for overrides in case of contradictory information from practice.
+
+The actual days to departure were used to calculate the bonus for urgency rather than the interval used in the dashboard to calculate booking snapshots. This decision was inspired by the principle of defensibility of a dashboard, since in the operational phase booking snapshots could have a completely different arrival pattern.
+
+\subsection{Real-Time Dashboard Support for Decision-Making}
+
+The third research question addressed the issue of how the prioritization model can be applied in a dashboard for help of the inventory analyst in identifying flights with the highest risks of delay. The dashboard that is introduced in Chapter 4 answers the research question using the combination of five interconnected tabs, which serve the purpose of inventory analyst's daily job.
+
+The first thing, which makes the Overview tab the key part of the prioritization dashboard, is the immediate visual access to the flights, whose urgency cannot be overlooked. The Today's Priorities widget allows to transform the ranked table into the list of particular tasks to perform, therefore answering the gap revealed in the literature \citep{Rouhani2016}, when it comes to dynamic suggestions generation on the dashboard. In addition, the Flight Analysis tab offers more detailed analysis of any flight chosen or filtered out by an analyst, including the comparison of this year and last year booking numbers and breakdowns according to the point of sale. The Replay tab shows how the dashboard will behave under changing booking situation, which is an example of the live process of work.
+
+Finally, the Peak Detection tab seems to be the most innovative part of the developed solution. The tab includes the human-in-the-loop AI approach that provides the analyst with the recurrent demand patterns discovered through historical data analysis. All detected peaks can be accepted or modified and additional peaks that were missed could be added manually. Therefore, all peaks that were selected are transformed into the peak calendar, which is used as input to other tabs of the dashboard. This design directly responds to the lack of solution revealed in the literature on operational decision support, as previous aviation dashboards did not use the peak calendar as the outcome of a process, but as an input to one.
+
+\section{Comparison with Existing Literature}
+
+The contributions of the findings of this thesis to the existing literature on airline revenue management and decision support for operations are numerous.
+
+Firstly, the thesis serves as a link between two previously disconnected research bodies. The airline revenue management body of literature \citep{Belobaba1987, PakPiersma2002, FiigIslerHopperstadBelobaba2010} has traditionally been focused on the computational aspects of optimization and overbooking models while paying little attention to the analyst's interaction with decision-making procedures that result from their use. The dashboard and decision support body of literature \citep{YigitbasiogluVelcu2012, Rouhani2016, WatsonWixomHoffer2006} has been devoted to the problems of information presentation and effects of real-time decision support on an organization yet hardly ever discussed airline inventory management as its specific case. In the course of this thesis, it is shown how the two literatures can be successfully connected via applying the dashboard designing principles to solving an operation-level task of airline inventory prioritization.
+
+Secondly, the thesis proposes a framework of route-independent airline operational dashboards. Previous research in the area of aviation operations dashboard \citep{RakshitKrishnamurthyYu1996, Salleh2023} has been typically route or airline-focused. At that, the developed dashboard is applicable to any number of routes since the addition of new routes to the dataset will require no changes in the code while all the route-dependent filtration, grouping, and visualization is performed dynamically. Hence, such design makes the dashboard suitable for wider network deployment than the current four routes' case study.
+
+Thirdly, the Peak Detection tab presents a human-in-the-loop AI solution, which is a novel contribution to the body of knowledge about aviation operation decision support. While being motivated by the body of human-in-the-loop AI literature where, generally speaking, the task of an algorithm is to provide human experts with candidate decisions, the task of an expert is to accept, refine, or reject these decisions, and this principle was applied in this project in the field of peak calendar maintenance for airline inventory management.
+
+\section{Implications for Industry Practice}
+
+There are numerous implications of implementing the presented dashboard to industry practice. First of all, for analysts responsible for managing inventory, this dashboard eases the task of handling multiple flights through the automatic highlighting of those instances which deserve attention as well as the provision of concrete recommendations instead of raw information. For the department of revenue management, the Peak Detection tab serves as a tool to manage a calendar based on peaks observed rather than the previous assumptions, which helps in overbooking more effectively. Finally, for executives and finance departments, the combination of point of sales helps to make a proper strategy regarding the market structure as well.
+
+Due to the route-independent nature of the dashboard, it could be easily implemented across the airline. To implement this dashboard on other routes, one needs just to include data on additional routes into the dataset.
+
+\section{Limitations of the Study}
+
+There are several limitations of the study that must be highlighted. The first one is the lack of application of the method on a live dataset. While the design of the dataset tried to include some patterns, the booking volumes, overbookings, and the distribution of demand in the sample were made by the researcher based on industry-wide practices rather than extracted from the operational data. There may be some differences in terms of performance in case of application to the live data, but the prioritization principle and design of the human-in-the-loop Peak Detection are expected to be applicable.
+
+A second issue relates to the connection between how the data is generated and the validation of the models. The data being used is designed such that there is a specific type of operation within that set (peaks calendar, overbooking behaviour, booking curves). As such, when the three machine learning techniques are tested on that data, the evaluation is of whether they will recognise the patterns that were put into it. Consequently, the results may appear to be more optimistic in nature than would be possible using operational data, because operational data would feature noise, exhibit less regular patterns, and would be influenced by exogenous variables like bad weather, politics, and competitive price cuts. The 100\% Decision Tree accuracy from Section 4.5.3 needs to be seen as an internal consistency check of the classification rules and NOT as a measure of future prediction accuracy, while the results for Random Forest and K-Means represent an upper bound on future performance which requires validation on real data. Overcoming this is an area of future research (see Section 6.3).
+
+The third limitation is that even though there are three ML approaches applied in the solution (including K-Means clustering, Random Forest regression, and Decision Tree classifier), as described in Section 3.4.7, the composite risk score is still a rule-based approach. It was done deliberately in order to have an opportunity to present and defend the score in the process of analysis, as well as to make it easy to apply in the operation (as described in Chapter 4). The next step might include applying ML to the primary scoring layer, based on historical labels of human decisions (as described in Chapter 2).
+
+The fourth limitation of the research is in the scope of the evaluation, which includes demonstrating functionality only. User studies with inventory analysts working on a real problem were not included in the scope of the thesis as they are considered a separate study.
+
+The fifth limitation is in setting up the thresholds of urgency bands in the composite score based on operational intuition and the structure of the synthetic dataset. The thresholds would need to be set up in correspondence with actual booking snapshot interval and its distribution.

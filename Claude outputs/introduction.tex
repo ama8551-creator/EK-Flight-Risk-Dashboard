@@ -1,0 +1,95 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+\section{Background}
+\label{sec:background}
+
+The airline industry is characterized by a very dynamic setting, where internal and external factors directly affect profitability. There is an element of unpredictability in demand, which can vary by route, alongside constant fluctuations in bookings \citep{PakPiersma2002, Belobaba1987}. This demand environment can be disrupted by regional and political events, with recovery periods making revenue optimization measures especially important. The effect on revenue performance is immediate for any airline with its main hub in the region.
+
+Given such disruptions, revenue optimization measures become essential, and mostly during recovery periods. Airlines aim to sell their inventory to the customer who pays the right price. In the context of airline revenue management, the term inventory refers to the seats available for sale on each flight, grouped into booking classes and cabins, rather than to physical stock or aircraft components. Revenue management has long been considered one of the most effective operational levers in the industry, with seat inventory control and overbooking estimated to contribute revenue gains of 4--6\% \citep{Belobaba1989, PakPiersma2002}. The core principle of airline revenue management is selling the right seat to the right customer at the right time and price \citep{SomboonAmaruchkul2016}. Achieving this requires the strategic management of multiple booking classes, known as Reservation Booking Designators (RBDs). Each RBD is represented by a letter and corresponds to a specific fare level, which is managed by a pricing team. The higher classes offers greater flexibility and higher fares, and lower classes offering more restricted and lower-cost options. Managing these classes is a key responsibility of the Market Operations and Inventory Steering teams.
+
+One of the key responsibilities of an inventory revenue optimization analyst is selling the right seat at the right time and price. This involves continuously monitoring the flights performance and cancellations, flown seat factors, and no-show rates, enabling the analyst to gain insight into route behavior and apply strategies such as overbooking to increase the number of seats sold \citep{Belobaba1987}. Overbooking refers to selling seats more than actual aircraft capacity to compensate for expected no-shows \citep{SomboonAmaruchkul2016}.
+
+Decisions regarding overbooking are particularly challenging in terms of timing, because the closer the departure date, the smaller the window an analyst has to adjust inventory, which can lead to revenue loss if not managed correctly. It's also different from route to route and mainly based on the passenger behaviour. The trade-off must be handled with care: overbooking a flight to the extent that customers cannot board results in compensation costs and customer dissatisfaction, while leaving empty seats results in lost revenue \citep{SomboonAmaruchkul2016}.
+
+This situation becomes even more complex when analysts are responsible for multiple routes, each operating several flights per direction. Currently, analysts depend on reports issued several times a day to identify flights that may need adjustment based on remaining seats or booking levels. The challenge lies in the fact that these reports are based on static snapshots, while booking activity on a given flight may shift considerably between report refreshes. This highlights the need for a real-time, data-driven decision-support tool, such as a prioritization dashboard that can dynamically identify high-risk flights and direct analyst attention to the decisions that matter most at any given moment.
+
+\section{Problem Statement}
+\label{sec:problem}
+
+In airline revenue optimization efforts, inventory analysts continually analyze flights and identify ones which will need action taken like overbooking to offset late cancellations, no-shows, or empty seats. The objective of overbooking is to improve seat utilization and recover revenue that would otherwise be lost due to passenger drop-off \citep{SomboonAmaruchkul2016}.
+
+In the current practice, this task remains mainly manual. Analysts must evaluate flights from an internal system while using a report provided by the company several times during the day. However, this report is based on a snapshot of data, and thus it does not provide analysts with the latest situation in bookings. Therefore, analysts may use old information when evaluating their flights since the booking trends will change very quickly especially in high-demand seasons \citep{Cooper2016, YigitbasiogluVelcu2012}.
+
+This becomes even harder since analysts may have to manage many flights at once and these flights may come from different directions. Moreover, there are several flights that will have to be evaluated in the process and this number becomes even higher in the high-demand season. This makes it difficult for analysts to review all flights effectively before departure because of a busy schedule and this results in losses that could be used to meet the airline's targets regarding revenue, yield and booking levels. This also affects operational performance measures such as denied boardings and downgrades, which are closely linked to analyst performance.
+
+Current processes provide no clear mechanism to indicate which flights require the most urgent attention. Analysts must assess flights one by one, without a data-driven view of priority. This becomes more important in dynamic scenarios whereby analysts may fail to capture fast-changing scenarios in terms of demand and booking trends. Thus, the main issue is the lack of a real-time, data-driven approach that would help analysts prioritize flights.
+
+\section{Research Aim and Objectives}
+\label{sec:aim}
+
+The aim of this thesis is to build a real-time decision support dashboard that helps inventory analysts in prioritizing high-risk flights within airline revenue management operations. By combining data analytics with practical dashboard design that covers the business need, the study seeks to reduce the operational gap between real-time booking activity and the tools currently available to analysts.
+
+To achieve this aim, the thesis pursues the following objectives:
+
+\begin{enumerate}
+    \item To determine the operational and booking variables that show the risk level of a flight before departure, based on revenue management literature of the airline industry.
+    \item To formulate a combined prioritization score that combines the above-mentioned variables into one score that will reflect the urgency of the analyst's attention.
+    \item To create a synthetic flight dataset that takes into account realistic booking patterns, seasonality, and operational factors that vary depending on the route.
+    \item To create an interactive real-time decision support system using Python and Streamlit that will visualize the risk level of each flight, allow for filtering and comparing the data and booking conditions in real time.
+    \item To create an AI-powered peak detection module that will analyze historical data on flights to propose recurring periods of demand and will allow analysts to approve, modify or add peaks to form an active peak calendar.
+    \item To include the point-of-sale analysis module into the decision support system that will allow analysts to analyze geographical patterns of bookings and understand the demand pattern at the market level for each flight.
+    \item To assess the efficiency of the created decision support system by demonstration and scenario testing.
+\end{enumerate}
+
+
+\section{Research Questions}
+\label{sec:rq}
+
+The main research question of this thesis is:
+
+\begin{quote}
+\textit{How can data analytics be used to identify and prioritize high-risk flights in real time to improve decision-making efficiency in airline inventory management?}
+\end{quote}
+
+For the sake of answering this main research question, several sub-questions are addressed, including:
+
+\begin{enumerate}
+    \item What operational and booking-related variables can be used to define the risk level associated with a flight before its departure?
+    \item How can these variables be combined into a prioritization score that reflects the urgency of analyst attention required for each flight?
+    \item How can this prioritization model be implemented in a dashboard to assist inventory analysts in identifying high-risk flights in real time?
+\end{enumerate}
+
+The first research question aims to find the variables that indicate the risk level of flights, which include parameters such as time to departure, cabin load factor, forecast seat factor, no-show rates, and cancellation rates. These variables are grounded in airline revenue management theory and can be drawn from the work of \citet{Belobaba1987,Belobaba1989}, \citet{PakPiersma2002}, and \citet{SomboonAmaruchkul2016}. The second research question focuses on how the identified variables can be combined into a prioritization score, in line with the principles of effective dashboard design described by \citet{YigitbasiogluVelcu2012}. Lastly, the third examines the implementation of this model in a real-time environment, drawing on insights from real-time decision support and aviation analytics research \citep{Rakshit1996, Salleh2023, Watson2006}.
+
+\section{Limitations of the Study}
+\label{sec:limitations}
+
+While this thesis contributes a practical approach to real-time flight prioritization in airline revenue management, several limitations should be acknowledged.
+
+First, the study is conducted within a controlled synthetic environment rather than in a live operational setting. The dataset was designed to reflect realistic operational patterns, including cabin-level bookings, seasonal peaks, day-of-week variations specific to the routes studied, and no-show and cancellation ranges. Real-time data was not used because detailed booking-level information is highly sensitive and confidential and is not publicly available.
+
+The real-time component of the dashboard is simulated by replaying booking events over a compressed timeline rather than by connecting to a live booking system. In an operational deployment, the same prioritization model would be applied to real-time snapshots delivered by an airline's internal booking system, without requiring changes to the underlying scoring logic.
+
+In addition, the scope was intentionally restricted to four routes with two to three daily flights each and a limited set of additional peak-period flights, in order to keep the project manageable within the thesis timeline; the model itself is designed to be route-agnostic and can be extended to additional routes or a full airline network in future deployments.
+
+Second, the prioritization model is developed as a composite risk-scoring approach rather than a machine learning model. This design decision was made to prioritize interpretability and ease of adoption, since the intended end users of the dashboard are inventory analysts with a business background rather than data scientists. An approach that is more transparent in its scoring is also one that will be easier to trust and implement. It is also more appropriate for use in a data analytics thesis where the focus is on building a practical prototype. However, more sophisticated machine learning methods could potentially provide additional predictive power and represent a natural extension of this work.
+
+Third, the evaluation of the dashboard is restricted to only functionality test and demonstration and not conducted on users who are inventory analysts. An evaluation of the dashboard that involves experts in the field will offer more concrete proof regarding the usability of the dashboard and is left for future work.
+
+\section{Structure of the Thesis}
+\label{sec:structure}
+
+This thesis is organized into six chapters.
+
+Chapter~\ref{ch:introduction} introduces the research context, presents the problem statement, defines the aim and objectives of the study, and outlines the main research question and its supporting sub-questions. It also discusses the limitations of the research.
+
+Chapter~\ref{ch:literature} reviews the existing literature across three thematic areas: airline revenue management and inventory control; dashboards, decision support, and business intelligence; and aviation operational dashboards with real-time analytics. The chapter ends by identifying the research gap this study addresses and summarizing the key takeaways.
+
+Chapter~\ref{ch:methodology} describes the research methodology. It covers creating the synthetic dataset, the operational and booking-related variables selected for analysis, the composite risk-scoring model, the three machine learning techniques integrated into the analytical pipeline, and the interactive Streamlit dashboard that brings these components together.
+
+Chapter~\ref{ch:findings} presents the findings. It examines the behavior of the synthetic dataset, the performance of the prioritization model in identifying high-risk flights, the functionality of the dashboard under simulated conditions, and the results of the three machine learning techniques.
+
+Chapter~\ref{ch:discussion} discusses the implications of the findings. It evaluates the contribution of the dashboard against the research questions, compares the proposed approach to existing tools and practices, and reflects on what the results mean for airline revenue management in practice.
+
+Chapter~\ref{ch:conclusion} concludes the thesis. It summarizes the main contributions, revisits the research questions, and outlines directions for future work, including user studies with practicing analysts, extending the dataset to additional routes, and integrating with live operational systems.

@@ -259,12 +259,35 @@ def train_forecast(flights: pd.DataFrame) -> ForecastBundle | None:
 
     features, encoder = _forecast_frame(eligible, encoder=None)
     target = eligible[FORECAST_TARGET].astype(float)
-    x_train, x_test, y_train, y_test = train_test_split(
-        features,
-        target,
+    # Flight-level split: all 11 snapshots of a flight stay together
+    # in either train OR test (prevents data leakage).
+    flight_groups = (
+        eligible["Flight No"].astype(str)
+        + "_"
+        + eligible["Dep Date"].astype(str)
+    )
+
+    from sklearn.model_selection import GroupShuffleSplit
+    gss = GroupShuffleSplit(
+        n_splits=1,
         test_size=TEST_SIZE,
         random_state=SPLIT_RANDOM_STATE,
     )
+    train_idx, test_idx = next(gss.split(features, target, groups=flight_groups))
+
+    x_train = features.iloc[train_idx]
+    x_test = features.iloc[test_idx]
+    y_train = target.iloc[train_idx]
+    y_test = target.iloc[test_idx]
+
+    # Print stats for the thesis
+    n_flights_train = len(set(flight_groups.iloc[train_idx]))
+    n_flights_test = len(set(flight_groups.iloc[test_idx]))
+    overlap = set(flight_groups.iloc[train_idx]) & set(flight_groups.iloc[test_idx])
+    print(f"[RF SPLIT] snapshots: train={len(x_train)}, test={len(x_test)}")
+    print(f"[RF SPLIT] unique flights: train={n_flights_train}, test={n_flights_test}")
+    print(f"[RF SPLIT] overlap (should be 0): {len(overlap)}")
+
     model = RandomForestRegressor(
         n_estimators=100,
         max_depth=10,

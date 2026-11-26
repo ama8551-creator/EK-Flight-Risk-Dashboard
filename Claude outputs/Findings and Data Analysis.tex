@@ -1,0 +1,215 @@
+\chapter{Findings and Data Analysis}
+\label{ch:findings}
+
+\section{Introduction}
+
+In this chapter, results from the thesis are outlined, based on the generated dataset in chapter 3 and the dash built in Python in Streamlit. This chapter starts by describing the characteristics of the generated dataset. It then highlights how the composite prioritization model clusters and prioritizes flights and proceeds to outline the features of the built dash, which is described in functional walk-through of all the five pages within. Relevant screenshots are provided throughout to describe some of the features of the dash.
+
+\section{Dataset Characteristics}
+
+The synthetic data set that has been created for this thesis consists of 31,449 flight-snapshot observations of 24 flights flying four routes in either direction over a span of time from January 2024 until March 2027. The data set is constructed as the snapshot of the moment on December 1st, 2026. Flights whose departure dates were before December 1st, 2026 are depicted in their flown form (FLN status), while the ones whose departure dates were after December 1st, 2026 are depicted as open flights in the process of getting booked.
+
+\subsection{Flights and Routes}
+
+The four routes are between Dubai to four cities within Middle East and Gulf Cooperation Council: Beirut (BEY), Amman (AMM), Jeddah (JED), and Riyadh (RUH). The routes have been considered with two directions for each of them resulting into a total of eight directional city pair routes. For the BEY route, three flight numbers fly from both directions but with one of them flying on peak time alone. For AMM route too, there is a similar scenario of three flight numbers in each of the two directions, with one more flight being operated through an Airbus A380 due to the use of big capacity aircrafts on a high demand period. Similarly, the JED and RUH routes have three regular flights operating in each of the two directions with Boeing 777 and Airbus A380 having total seating capacities of 360 and 484 respectively.
+
+\subsection{Peak Calendar}
+
+The dataset has considered a complete peak calendar of the seasonality factor that takes into account specific demand trends. For Beirut and Amman routes, these peaks will consist of demand arising during Christmas outbound and inbound peaks, extended summer season, New Year's inbound peaks, Eid al Fitr and Eid al Adha outbound and inbound peaks, UAE National day peaks, and school break inbound Amman peak. On Jeddah route, these religious tourism-based peaks will comprise outbound and inbound demand during Hajj travel window, which is based on actual Hajj dates each year; demand based on Umrah in daily intervals of Ramadan, weekend-based demand in Umrah during December and January in order to capture UAE National Day and school breaks together, and Eid al Fitr inbound demand. In the case of Riyadh route, there will be outbound demand during weekdays Sunday till Thursday and inbound demand during weekends Friday and Saturday.
+
+\subsection{Overbooking Scenarios}
+
+In order to be able to incorporate realistic operational risks into the dataset, there are also instances of overbooking depending on the flight routes being taken into consideration. This can be observed on the Amman route, whereby the Economy class is overbooked on Summer Return Full Peak (August 14-31), New Year Return, Eid Returns and UAE National Day Return. In addition, on the Jeddah route, the Economy class is overbooked on the Hajj outbound \& Return periods, Ramadan Umrah, peak weekends for Umrah, and Eid al-Fitr Return. On the Riyadh route, there are also instances of overbooking involving the Business Class where two passengers are overbooked on the Corporate flights.
+
+\subsection{Point of Sale Distribution}
+
+The bookings of every row in the dataset contain per-flight data for bookings based on country of sale of tickets, represented by standard two-letter country codes. In this generated dataset, United Arab Emirates is the top market for flights through these airports with nearly 85\% to 90\% share of total bookings, since the local market has strong demand in UAE residents and diaspora for travelling to and from these locations. The other countries that contribute the share of bookings include Saudi Arabia (for the local market of Jeddah and Riyadh flights), Lebanon \& Jordan (as local market for Beirut and Amman flights respectively), along with diaspora markets of Australia, Canada and US, in addition to small European markets.
+
+\subsection{Data Validity and Reliability}
+
+Several procedures were performed to validate the synthetic data. Replicability of the results was confirmed by setting a fixed random seed number in the generator script, which allows any user to reproduce the same data set by running the script. Internal consistency was checked by verifying that for each record, the values in the Bookings variables are the same as Booked Seat Factor times the corresponding Capacity variables; that the Total BSF variable is calculated correctly as the proportion of the total bookings to the total capacity, and the sum of POS country values is equal to the total bookings for the flights. Validity of booking curve was proven visually by observing that the bookings evolve according to the expected pattern. Validation of peak period assignment was carried out by asking the dataset to query data at certain dates and verifying that the flights fall under the right peak periods applying appropriate day-of-week rule. Realism of the created dataset has been checked against the general operational data by verifying that the peak periods lead to nearly full flights, premium cabins book slower on leisure flights compared to Economy, but business cabin drives demand for the flight to Riyadh and that overbooking cases generate the expected pattern per flight.
+
+\subsection{Problems Encountered During Implementation}
+
+A number of questions arose while implementing this solution and they were solved in an iterative manner. At first, due to the incorrect positioning of overbooking patterns in earlier versions of the dataset, no free flight instances in the RED class existed up to the date of the snapshot, December 1, 2026. This issue was solved by shifting the overbooking progression curves so that overbooking started much earlier than in the last day of the booking window and by placing the UAE National Day Return peak for the route between Amman and JED. Moreover, dataset was expanded from two routes to four, which would show the greater diversity of operational demand behavior, and logic specific to particular route (Hajj and Umrah for the JED route, corporate week-days for the RUH route) was implemented at that stage. The initial values of forecast BSF were set equal to the actual BSF without considering the forecasting error, thus, it was necessary to add some variability to the difference between the forecasted and real values.
+
+\subsection{Dataset Composition at the Snapshot Date}
+
+At the point in time under analysis, there are roughly 21,718 records for historically scheduled flights from January 2024 to November 2026, together with roughly 9,731 records for future open flight-snapshots, which refer to 1,852 open flights that will depart on the days ranging from December 1, 2026, to March 31, 2027. There are multiple snapshots per open flight per defined booking checkpoints, with the latest snapshot as of the given date considered as the state of a flight.
+
+Out of all 1,852 open flights, there are roughly 11 flights that are currently above total aircraft capacity (Risk Category - RED), roughly 112 flights having overbooked Economy cabin and close to departure, hence requiring more attention (Risk Category - ORANGE) and 89 flights estimated to be above capacity as of the day of departure (Risk Category - YELLOW). The rest of the open flights are placed in the GREEN Risk Category.
+
+\section{Prioritization Model Results}
+
+This composite prioritization model from Chapter 3 has been used for all open flights on the basis of data as per the snapshot. These results are used to understand the classification of these flights into various risk groups, differences in these flights as per their scores and rank in each group.
+
+\subsection{Risk Category Distribution}
+
+Table~\ref{tab:risk-dist} presents the distribution of open flights across the four risk categories as of December 1, 2026.
+
+\begin{table}[H]
+\centering
+\caption{Risk Category Distribution of Open Flights as of December 1, 2026}
+\label{tab:risk-dist}
+\begin{tabular}{llp{7cm}}
+\hline
+\textbf{Risk Category} & \textbf{Number of Flights} & \textbf{Representative Pattern} \\
+\hline
+RED & 11 & Near-departure holiday return + weekend religious travel \\
+ORANGE & $\sim$112 & Year-end return traffic + weekday corporate overbooking \\
+YELLOW & $\sim$89 & Forecast overbooking at departure \\
+GREEN & Remainder & Operating within expected parameters \\
+\hline
+\end{tabular}
+\end{table}
+
+Of all the RED flights, there are two distinct patterns of demand for flights. On one hand, there are three flights departing within a couple of days after the snapshot period and in the period of holiday return. In this case, an airline-wide set parameter of overbookings for the Economy cabin along with a late buildup in premium classes exceeds the capacity of the plane.
+
+On the other hand, there are eight flights departing on the weekends and in the periods of religious-tourism peaks. In this case, the combination of increased outbound and return demand on weekends produces breaches of total capacity. All of these flights are those that need urgent attention of analysts to avoid denials.
+
+The ORANGE category is characterized by the year-end return pattern where Economy is overbooked on peak dated flights, whereas the total load is within capacity because of insufficient premium bookings. Besides, there are several flights departing on weekdays under the corporate pattern of demand where business class overbooks on average of a few passengers per flight. Such flights should be monitored carefully but not required an immediate action.
+
+YELLOW flights in their turn are those that have not reached capacity levels in terms of bookings, but where their forecasts suggest exceeding of total capacity at departure.
+
+Along with the counts for each risk type, the Overview KPI line shows two more operational metrics: the number of passengers at risk of denial of embarkation on the RED flights, and the count of flights marked by the Underperforming versus Last Year risk flag. On the data of snapshot day, these metrics are 129 and 168, correspondingly.
+
+\subsection{Secondary Flag: Underperforming vs Last Year}
+
+The underperforming versus last year secondary indicator does not depend on which category the particular flight belongs to within the main risk assessment. The flights, which possess such indicator, do so because of their BSF being at least ten percentage points lower than the BSF of the flight from the previous year. There are flights within the GREEN category having that indicator, thus demonstrating that low demand may appear even on such flights, for which there is no need to worry about capacity usage currently.
+
+\subsection{Composite Score Behavior}
+
+The composite score creates a clear demarcation between groups. Flights from category RED that depart within five days of taking the snapshot receive full points of 100: 75 for the RED base, 25 points for full urgency bonus (up to five days prior to flight) and more severity points based on total BSF that exceeds 100 percent. Flights of ORANGE category cluster around 50 points due to 45 points as a base for the ORANGE group and less urgency bonus because flights are scheduled between 21 and 60 days of departure. Flights of category YELLOW get fewer points in keeping with their nature.
+
+Sorting of this kind makes RED flights appear as a first group just below the line where KPIs are shown. The main goal of the dashboard prioritization scheme is to see such flights from the beginning of the Overview table.
+
+\subsection{Connection to the Research Questions}
+
+The results of the current section answer Research Questions 1 and 2. As discussed in Section 3.3.2, time to departure, BSF at cabin level, forecasted BSF, BSF on vLY, and the associated risk category (Section 3.3.2) constitute the variables that capture the operational signals of a high-risk versus normal flight, answering Research Question 1. In Section 3.4.1, we describe how the scoring process can combine the aforementioned variables in one understandable score, helping us prioritize the flights and mimicking the operational thinking of experienced practitioners, thereby answering Research Question 2.
+
+\section{Dashboard Functionality}
+
+The dashboard was developed with Python programming language, making use of the Streamlit framework for web deployment. The user interface consists of five tabs enabled by a sidebar that has nine filters available on all pages. This document will briefly review the features of each of the tabs with the help of screenshots, illustrating how the analyst sees the output. Any route or flight number information is represented in abstract form in this document as per the explanation given in Chapter 1.
+
+\subsection{Overview Tab}
+
+The Overview tab is where you can enter the dashboard. The top part of your screen shows six KPI cards representing the current operations state: total flights that are open, total number of RED flights, total number of ORANGE flights, total number of YELLOW flights, total number of passengers who are in danger of denied boarding, and total number of flights that are now performing worse than in the previous year. Under the KPI cards is the Today's Priorities widget that shows five to seven urgent issues, chosen automatically based on the ranked flights list. There is an alarm banner displayed in red color when any of the flights belong to the RED group.
+
+At the heart of the Overview tab is the ranked list of all open flights sorted in order of descending their composite risk score. In every row, you have flight identification code, route, scheduled date and time, weekday, actual days until departure, cabin-level and total BSF numbers (displayed in colors depending on the level of overbooking), forecast BSF total number, number of at-risk passengers, BSF relative to the same flight from the previous year (also in colors depending on change direction), and finally -- the Risk Category icon. By clicking any row of the list, one can reveal a more detailed description in the pane under the table.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_1.png}
+\caption{Overview tab with alert banner, KPI cards, Today's Priorities, and the ranked flight table.}
+\label{fig:overview}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_2.png}
+\caption{Row detail panel for a RED flight (EK802 JED--DXB, 6 December 2026) showing the cabin-level booking breakdown, the smart action recommendation, and the composite risk score explanation that ties back to the formula defined in Section 3.4.1.}
+\label{fig:rowdetail}
+\end{figure}
+
+
+\subsection{Flight Analysis Tab}
+
+Tab Flight Analysis offers an insight into booking pattern analysis and flights point of sale distribution. Filters provided at the level of tab consist of the flight number, date range, direction, and route filters; together with the filters in the sidebar, filters on tab level narrow down the scope of analysis.
+
+Two sub-tabs are included in tab. On Booking Curve sub-tab, booked seat factor is displayed for 11 points before departure for 120 days before till 1 day before. Different colored lines illustrate current year, while the same line in dashed form illustrates the previous year. The reference line is plotted at 100 percent load. When certain flight is selected, the curve for that particular flight in different cabins is illustrated on the chart; in case of non-selected flight, the aggregation is made for selected scope and group either by direction, route or cabin, depending on chosen aggregation.
+
+On Point of Sale sub-tab, donut chart with geographic distribution of bookings by sales countries is displayed along with the top markets summary and table breakdown. In case of selected flight, the Point of Sales distribution for this particular flight is provided, in case of non-selected flight, the current filter scope is aggregated.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_3.png}
+\caption{Flight Analysis tab --- Booking Curve sub-tab, showing per-cabin booked seat factor across the eleven snapshot points before departure for flight EK802 (JED--DXB, 6 December 2026). This-year curves are solid and last-year curves are dashed grey.}
+\label{fig:bookingcurve}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_4.png}
+\caption{Flight Analysis tab --- Point of Sale sub-tab, showing the geographic distribution of bookings for flight EK802 (JED--DXB, 6 December 2026). The donut chart visualises market share per country of sale, while the table below displays the exact counts.}
+\label{fig:pos}
+\end{figure}
+
+
+\subsection{Peak Detection Tab}
+
+Peak Detection tab implements the functionality of making recommendations that was described in Chapter 3.4.5 above. A route is selected by the analyst along with the additional options such as specifying direction, range of dates, point of sale, or a flight number and pressing a button named Detect Peaks. The algorithms detect the weeks when the average total BSF of flights of the chosen route exceeds the threshold, then performs analysis of days of week and determines if this is full-week peak or day-of-week anchored.
+
+Detected peaks are visualized in the form of recommendation cards, sorted by average BSF. Each recommendation card consists of peak name, direction, range of dates, average BSF, days of week pattern, a confidence indicator, and buttons for accepting/rejecting recommendation. Pressing on the body of the card will bring up a panel with a list of flights and chart showing daily BSF for the year prior to the year covered by the peak, allowing analyst to verify the pattern before accepting the recommendation.
+
+Peaks may also be added by the analyst manually by pressing an Add New Peak button and filling out a form with name, route, direction, dates, and pattern of the days of week for the peak. Manually created peaks are stored with AI-generated peaks and have a badge called Manual.
+
+Accepted and manual peaks are saved in a JSON file placed in project data folder. "Period" column on the Overview tab is left empty unless the flight has the route, direction and date range falling into some approved peak, thus making the peak calendar of the dashboard totally curator based.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_5.png}
+\caption{Peak Detection tab, showing the K-Means clustering algorithm indicator with the live silhouette score and number of clusters calculated on the filtered data set, the filter bar for selecting route, direction, date range, point of sale and flight number, and two AI-detected peak recommendation cards for the Ramadan Umrah outbound and return patterns on the JED route. Each peak card contains options for accepting, rejecting and reviewing flights, and further peaks may be added manually through the ``Add new peak manually'' button.}
+\label{fig:peakcards}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_6.png}
+\caption{Peak Detection verification panel for the ``Ramadan Umrah Outbound'' recommendation, showing the history of flight-by-flight performance data from the corresponding period in 2026 (84 flights with a mean Total BSF of 96.7\% and a peak on 14 March 2026, with 103.1\%). The table indicates BSFs per flight along with the period assigned to the system initially, while the graph below plots the Daily Average of Total BSF against the 85\% peak line.}
+\label{fig:peakverify}
+\end{figure}
+
+
+\subsection{Replay Tab}
+
+Replay tab hosts real-time simulation described in Section 3.4.4. Analysis of the simulation is done via the slider control, which defines the as-of date and whose range spans the period from 60 days before the current snapshot date to the current date. Playback of the simulation is possible with the help of control tools that advance the slider automatically either 1x, 2x, or 5x days per second.
+
+As the slider changes, new overview table is recalculated by applying the snapshot that is closest to, but does not exceed the selected as-of date to each flight. Days-to-departure calculations are updated, and the rule set for risk categorization is applied to generate new risk categories. Analyst observes dynamic reorganization of the table, where flights enter and depart from certain risk categories and composite risk score increases for flights with imminent departures.
+
+Play-back of the simulation from 60 days prior to the snapshot date to the current date generates narrative that could not be generated in a static report. Current flights of the RED category could not be observed during the initial state of the playback since at the distance of 60 days prior to departure the flights did not have a sufficient amount of bookings. However, during play-back process these flights gain bookings and get into the ORANGE category by crossing the threshold of 100 percent booking rate in Economy cabin. At a distance of less than a day before departure such flights enter RED risk category as a consequence. During this process composite risk scores become bigger, thus pushing flights to more prominent places in the ranking.
+
+Therefore, it allows to directly answer Research Question 3: whether interactive dashboard helps real-time decision making in airline inventory management problem. In particular, this simulation demonstrates correctness of the model response on the changes in booking situation, proper order of entry and exit of flights into the corresponding risk categories, and dynamic re-ordering of the list of risky flights. Of course, in live system the similar re-ordering of risk categories and flights would happen upon arrival of the live bookings, but the simulation reflects this kind of behavior correctly.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_7.png}
+\caption{Replay tab with the as-of slider positioned at 6 October 2026, 56 days before the snapshot date. The dashboard has been re-scored at this earlier date to show the status of the flight schedule as of that point: no RED flights, no ORANGE flights, six YELLOW flights, and a total of eighty open flights with lower seat bookings compared to the current snapshot.}
+\label{fig:replay}
+\end{figure}
+
+
+\subsection{Help and Guide Tab}
+
+``Help \& Guide'' Tab has everything an analyst needs under one hood. This section is divided into accordion sub-sections which have the following information - description of dashboard purpose, Risk categories descriptions, column descriptions, filter guide, composite score calculation guide, brief explanation of each tab, workflow to be followed by analysts every day, methodology points and FAQ section. There is a button on the top of the tab from where a PDF copy of all the content of guide section can be downloaded.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{frontmatter/fig/figure4_8.png}
+\caption{Help and Guide tab, showing the accordion structure with eleven sub-sections detailing the dashboard purpose, risk category descriptions, column headings and descriptions, filter criteria, scoring method, tab descriptions, analyst process flow, methodology notes, machine learning models, FAQs, and the downloadable PDF version of the full dashboard guide.}
+\label{fig:help}
+\end{figure}
+
+
+\section{Machine Learning Results}
+
+Machine learning algorithms introduced in section 3.4.7 have been applied to the data set under study. This section highlights the quantified performances of the models.
+
+\subsection{K-Means Clustering for Peak Detection}
+
+The Clustering Algorithm was applied to 1,224 week direction samples taken from the historical flown samples. There were three generated clusters, each with a silhouette score of 0.740. This implies there is excellent separation structure in the data set being clustered. The high peak cluster comprised of 181 week direction samples with an average booked seat factor of 81.0\% while the shoulder cluster comprised of 356 samples at 63.4\%. Off-peak cluster has 687 week directions, each with an average of 42.8\%. The distinctiveness of the clusters implies that there are demand regimes which are distinct in historical data that can be captured through an unsupervised algorithm.
+
+Silhouette score of an observation i, S (i) is defined as the expression s (i) = (b (i)-a (i))/max[a (i), b (i)]. Where a (i) is mean distance from i to other points within its cluster while b (i) is mean distance of i to other points in the nearest neighbouring cluster.
+
+\subsection{Random Forest Regression for Forecast BSF}
+
+The Random Forest regression model was trained using 7,559 snapshots and tested on 1,890 out-of-sample snapshots. As a result of running tests on the out-of-sample data, the test Mean Absolute Error of 0.0215 (2.15 percentage points) was obtained as well as the test Coefficient of Determination of 0.979. The importance of features was calculated and such features as Economy BSF (importance=0.311), days to departure (0.248), total BSF (0.119), First Class BSF (0.118) and flight direction (0.107) were highlighted as the most important. High accuracy of prediction shows that BSF forecast made using the Random Forest can be treated as an accurate forecast which replaces old static forecast of the dashboard.
+
+The mean absolute error (MAE) equals to $\mathrm{MAE} = \dfrac{1}{n} \sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|$, where $y_i$ is the total BSF value and $\hat{y}_i$ is the predicted total BSF.
+
+\subsection{Decision Tree Classification for Risk Category}
+
+Decision tree classification was carried out using training data set comprising of 1,723 open flight records. Test performance was obtained using data records of 739 flights that were not used during training. Performance on test data shows 100 percent accurate classification of all four risks which validates that the rule base categorization of flight risks is totally learnable from the data and there is no inconsistency in the way the rules have been formulated. Based on feature importances, the most important three features were found to be Total BSF, Business class BSF and forecast total BSF, all having an importance of 0.333. This finding supports the rule formulation and confirms that the scoring model is working on right features.
+
+\subsection{Interpretation}
+
+Overall, the three ML methods support the thesis in their own ways. The cluster analysis proves the Peak Detection method, which shows that past demands separate well and can be categorized into intelligible regimes. The regression model gives us an automatic prediction to substitute the static forecasts in previous dashboards and make a better prediction for the YELLOW regime classification. The classification method validates that the manual classification logic we have made is learnable. In all three methods, ML helps our pipeline in the right places without interfering with the existing interpretability.

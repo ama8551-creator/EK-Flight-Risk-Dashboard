@@ -1,0 +1,36 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+This marks the end of this thesis. This chapter reflects on the research questions based on the findings and makes conclusions based on the findings in previous chapters as well as suggestions for those airlines that are planning to implement such a system.
+
+\section{Conclusions}
+
+This thesis contributes in several aspects in total. First of all, it connects together two areas of research, which traditionally did not have much in common, namely, the area of airline revenue management, and the area of dashboards and decision support systems. While the former is traditionally concerned with the mathematical side of seats inventory optimization, the latter usually deals with organizational decision making in a more general context. Thus, a combination of those areas is used in the thesis to design a specific dashboard for the problem at hand.
+
+Secondly, the thesis offers a combined risk scoring approach for assessing the risk based on the values of currently booked seat factor, projected booked seat factor, time left to the date of departure, last year performance, and cabin-wise overbooking. That composite risk scoring approach is easy to understand and use for audit purposes, and does not require from the user to believe in black box algorithm.
+
+Thirdly, there are three different machine learning algorithms that are integrated into the dashboard pipeline, namely, K-Means for the task of peak detection, Random Forest for forecasting booked seat factors, and the Decision Tree classifier for the task of risk category validation.
+
+Finally, the thesis proposes a route-independent dashboard design approach, which means that there will be no need for any changes in its implementation to reuse it for other routes.
+
+\section{Recommendations}
+
+The following recommendations may be drawn from this project by airlines looking to employ decision support technology of their own. First of all, interpretability should come ahead of black-box optimization in development of airline-specific solutions. Rule-based composite scoring with ML-driven sub-components produces tangible value without damaging analysts' trust.
+
+Second, the interface should comply with cognitive load principles, so that the highest priority alerts are always at a glance, and visual coding (color, position, size) should correspond to their urgency.
+
+Third, machine learning solutions should be implemented incrementally and transparently, letting analysts examine, accept, modify or ignore recommendation produced by machine learning algorithms. Peak Detection in this thesis would be an example of the human-in-the-loop pattern.
+
+Fourth, airlines should develop POS analysis as a separate component of the revenue management dashboards, as shifts in POS mix often indicate changes in demand mix that cannot be captured via average load factor.
+
+\section{Future Work}
+
+Several avenues can be explored in order to further develop this research. Firstly, a user study should be performed on a real group of inventory analysts in order to validate the results of functional testing which is performed in the course of this thesis work and confirms functionality of the dashboard. However, user studies will validate the actual performance of the dashboard in reducing decision time, improving accuracy and influencing behavior.
+
+Secondly, a new set of routes, not considered before, needs to be developed in terms of their specific demand characteristics and added to the dataset. In the current case there are four representative routes, which show different types of demand characteristics (diaspora vacation, mixed vacation and school vacation, religious tourism and corporate weekday). However, for production use case, all flights should be covered.
+
+Thirdly, the composite risk score could be partly replaced with the prioritization model that was being learnt on the basis of previous inventory analysts' decisions. Such model would learn the decisions based on previous analyst actions and provide recommendations which flights to act upon along with rule-based score.
+
+Furthermore, the dashboard can be enhanced to suggest not only prioritization of the flights, but actual actions and overbooking levels, that is making the system more of the decision recommendation, rather than decision support tool.
+
+Finally, the use of live system integration in order to perform operations automatically needs to be researched separately from the current static analysis work.
